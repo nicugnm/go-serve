@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package main;
+
+option go_package = "./nicolaemariusghergu";
+
+// RPC used by the client in order to do the server request
+service RouteGuide {
+  rpc GetFeature(Request) returns (Response) {}
+
+  rpc RouteChat(stream Request) returns (stream Response) {}
+}
+
+message Request {
+  ClientInfo clientInfo = 1;
+  string type = 2;
+}
+
+message Response {
+  ClientInfo clientInfo = 1;
+  string response = 2;
+}
+
+message ClientInfo {
+  string name = 1;
+}
