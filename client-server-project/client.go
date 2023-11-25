@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	log "github.com/sirupsen/logrus"
+	"go-serve/nicolaemariusghergu/exercises"
 	"io"
 	"sync"
 
@@ -16,8 +17,6 @@ import (
 )
 
 const (
-	defaultType = "Type Client"
-
 	TIMEOUT_SECONDS = 5
 )
 
@@ -26,6 +25,7 @@ var (
 )
 
 type routeGuideClient struct {
+	ExerciseNumber int32
 }
 
 func (s *routeGuideClient) RecordRoute(clientName string, stream pb.RouteGuide_RouteChatClient) error {
@@ -46,11 +46,9 @@ func (s *routeGuideClient) RecordRoute(clientName string, stream pb.RouteGuide_R
 }
 
 func (s *routeGuideClient) sendMessageToServer(clientName string, stream pb.RouteGuide_RouteChatClient) error {
-	errSend := stream.Send(&pb.Request{ClientInfo: &pb.ClientInfo{Name: clientName}, Type: defaultType})
-	if errSend != nil {
-		log.Errorf("An error has occurred while sending CLIENT_REQUEST_MESSAGE message. Err=%v", errSend)
-		return errSend
-	}
+	strategy := exercises.ExerciseStrategy{ExerciseNumber: s.ExerciseNumber}
+	strategy.SendExercise(clientName, stream)
+
 	return nil
 }
 
@@ -100,7 +98,8 @@ func main() {
 		go func() {
 			defer wg.Done()
 
-			client := routeGuideClient{}
+			// Every client has it's own problem
+			client := routeGuideClient{ExerciseNumber: int32(i + 1)}
 
 			// Call RecordRoute to handle the streaming
 			if err := client.RecordRoute(fmt.Sprintf("Client %v", i), stream); err != nil {

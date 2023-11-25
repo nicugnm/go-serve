@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"go-serve/nicolaemariusghergu/exercises"
 	"io"
 	"net"
 	"sync"
@@ -13,7 +14,8 @@ import (
 )
 
 var (
-	port = flag.Int("port", 50051, "The server port")
+	port             = flag.Int("port", 50051, "The server port")
+	MAX_SIZE_MESSAGE = 2952998688
 )
 
 const (
@@ -57,9 +59,36 @@ func (s *server) processIncomeMessages(stream pb.RouteGuide_RouteChatServer, wg 
 			break
 		}
 
-		log.Infof(SERVER_RECEIVED_MESSAGE, request.ClientInfo.Name, request.Type)
+		log.Infof(SERVER_RECEIVED_MESSAGE, request.ClientInfo)
 		sendResponseServerReceivedMessage(stream, request)
 		sendProcessingDataMessage(stream, request)
+
+		ExercisesServer := &exercises.ServerExercises{}
+
+		switch request.ExerciseNumber {
+		case 1:
+			ExercisesServer.HandleExercise1(stream, request)
+		case 2:
+			ExercisesServer.HandleExercise2(stream, request)
+		case 3:
+			ExercisesServer.HandleExercise3(stream, request)
+		case 4:
+			ExercisesServer.HandleExercise4(stream, request)
+		case 5:
+			ExercisesServer.HandleExercise5(stream, request)
+		case 6:
+			ExercisesServer.HandleExercise6(stream, request)
+		case 7:
+			ExercisesServer.HandleExercise7(stream, request)
+		case 8:
+			ExercisesServer.HandleExercise8(stream, request)
+		case 9:
+			ExercisesServer.HandleExercise9(stream, request)
+		case 10:
+			ExercisesServer.HandleExercise10(stream, request)
+		default:
+			log.Errorf("Exercise not implemented: %v", request.ExerciseNumber)
+		}
 	}
 }
 
@@ -85,7 +114,7 @@ func (s *server) sendResponses(stream pb.RouteGuide_RouteChatServer, wg *sync.Wa
 func sendResponseServerReceivedMessage(stream pb.RouteGuide_RouteChatServer, request *pb.Request) {
 	errSend := stream.Send(&pb.Response{
 		ClientInfo: request.ClientInfo,
-		Response:   fmt.Sprintf(RESPONSE_SERVER_RECEIVED_MESSAGE, request.Type),
+		Response:   fmt.Sprintf(RESPONSE_SERVER_RECEIVED_MESSAGE, request.StringArray),
 	})
 	if errSend != nil {
 		log.Errorf(ERROR_SEND_SERVER_RECEIVED_MESSAGE, errSend)
@@ -95,7 +124,7 @@ func sendResponseServerReceivedMessage(stream pb.RouteGuide_RouteChatServer, req
 func sendProcessingDataMessage(stream pb.RouteGuide_RouteChatServer, request *pb.Request) {
 	errSend := stream.Send(&pb.Response{
 		ClientInfo: request.ClientInfo,
-		Response:   fmt.Sprintf(SERVER_PROCESSING_DATA_MESSAGE, request.Type),
+		Response:   fmt.Sprintf(SERVER_PROCESSING_DATA_MESSAGE),
 	})
 	if errSend != nil {
 		log.Errorf(ERROR_SEND_SERVER_PROCESSING_DATA_MESSAGE, errSend)
@@ -119,7 +148,9 @@ func main() {
 	if err != nil {
 		log.Fatalf("Couldn't start the server. Err= %v", err)
 	}
-	s := grpc.NewServer()
+	s := grpc.NewServer(
+		grpc.MaxRecvMsgSize(MAX_SIZE_MESSAGE),
+		grpc.MaxSendMsgSize(MAX_SIZE_MESSAGE))
 	pb.RegisterRouteGuideServer(s, &server{})
 	log.Printf("Server started at= %v", lis.Addr())
 

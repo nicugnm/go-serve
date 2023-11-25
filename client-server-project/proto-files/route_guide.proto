@@ -1,30 +1,27 @@
 syntax = "proto3";
 
-package main;
+package nicolaemariusghergu;
 
-option go_package = "./nicolaemariusghergu";
+option go_package = "nicolaemariusghergu/proto-files";
 
-// RPC used by the client in order to do the server request
 service RouteGuide {
-  rpc GetFeature(Request) returns (Response) {}
-
-  rpc RouteChat(stream Request) returns (stream Response) {}
-}
-
-message Request {
-  ClientInfo clientInfo = 1;
-  string type = 2;
-}
-
-message Response {
-  ClientInfo clientInfo = 1;
-  string response = 2;
+  rpc RouteChat (stream Request) returns (stream Response);
 }
 
 message ClientInfo {
   string name = 1;
+  int32 exercise_number =2;
 }
 
-message StringArray {
-  repeated string strings = 1;
+message Request {
+  ClientInfo client_info = 1;
+  int32 exercise_number = 2;
+  repeated string string_array = 3;
+}
+
+message Response {
+  ClientInfo client_info = 1;
+  string response = 2;
+  int32 exercise_number = 3;
+  repeated string result_array = 4;
 }

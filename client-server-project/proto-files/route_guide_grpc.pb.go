@@ -4,7 +4,7 @@
 // - protoc             v3.20.3
 // source: proto-files/route_guide.proto
 
-package nicolaemariusghergu
+package proto_files
 
 import (
 	context "context"
@@ -22,7 +22,6 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type RouteGuideClient interface {
-	GetFeature(ctx context.Context, in *Request, opts ...grpc.CallOption) (*Response, error)
 	RouteChat(ctx context.Context, opts ...grpc.CallOption) (RouteGuide_RouteChatClient, error)
 }
 
@@ -34,17 +33,8 @@ func NewRouteGuideClient(cc grpc.ClientConnInterface) RouteGuideClient {
 	return &routeGuideClient{cc}
 }
 
-func (c *routeGuideClient) GetFeature(ctx context.Context, in *Request, opts ...grpc.CallOption) (*Response, error) {
-	out := new(Response)
-	err := c.cc.Invoke(ctx, "/main.RouteGuide/GetFeature", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 func (c *routeGuideClient) RouteChat(ctx context.Context, opts ...grpc.CallOption) (RouteGuide_RouteChatClient, error) {
-	stream, err := c.cc.NewStream(ctx, &RouteGuide_ServiceDesc.Streams[0], "/main.RouteGuide/RouteChat", opts...)
+	stream, err := c.cc.NewStream(ctx, &RouteGuide_ServiceDesc.Streams[0], "/nicolaemariusghergu.RouteGuide/RouteChat", opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -78,7 +68,6 @@ func (x *routeGuideRouteChatClient) Recv() (*Response, error) {
 // All implementations must embed UnimplementedRouteGuideServer
 // for forward compatibility
 type RouteGuideServer interface {
-	GetFeature(context.Context, *Request) (*Response, error)
 	RouteChat(RouteGuide_RouteChatServer) error
 	mustEmbedUnimplementedRouteGuideServer()
 }
@@ -87,9 +76,6 @@ type RouteGuideServer interface {
 type UnimplementedRouteGuideServer struct {
 }
 
-func (UnimplementedRouteGuideServer) GetFeature(context.Context, *Request) (*Response, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetFeature not implemented")
-}
 func (UnimplementedRouteGuideServer) RouteChat(RouteGuide_RouteChatServer) error {
 	return status.Errorf(codes.Unimplemented, "method RouteChat not implemented")
 }
@@ -104,24 +90,6 @@ type UnsafeRouteGuideServer interface {
 
 func RegisterRouteGuideServer(s grpc.ServiceRegistrar, srv RouteGuideServer) {
 	s.RegisterService(&RouteGuide_ServiceDesc, srv)
-}
-
-func _RouteGuide_GetFeature_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Request)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(RouteGuideServer).GetFeature(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/main.RouteGuide/GetFeature",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(RouteGuideServer).GetFeature(ctx, req.(*Request))
-	}
-	return interceptor(ctx, in, info, handler)
 }
 
 func _RouteGuide_RouteChat_Handler(srv interface{}, stream grpc.ServerStream) error {
@@ -154,14 +122,9 @@ func (x *routeGuideRouteChatServer) Recv() (*Request, error) {
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var RouteGuide_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "main.RouteGuide",
+	ServiceName: "nicolaemariusghergu.RouteGuide",
 	HandlerType: (*RouteGuideServer)(nil),
-	Methods: []grpc.MethodDesc{
-		{
-			MethodName: "GetFeature",
-			Handler:    _RouteGuide_GetFeature_Handler,
-		},
-	},
+	Methods:     []grpc.MethodDesc{},
 	Streams: []grpc.StreamDesc{
 		{
 			StreamName:    "RouteChat",
